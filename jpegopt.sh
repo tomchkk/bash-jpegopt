@@ -1,12 +1,12 @@
 #!/bin/sh
 
-## A basic shell script to run command 'jpegtran -optimize' recursively – with any of its available options set – on one of the following:
-	# a) the current directory
-	# b) the last occurrence of a directory in the argument list
+# A shell script to run command 'jpegtran -copy none -optimize' recursively, on a given directory, and with any of jpegtran's available options set
 
 VERSION="1.0"
+AUTHOR="lickyourlips"
+VERSION_STMNT="JPEGOPT Version $VERSION – September 2015\nAuthor: $AUTHOR"
 
-function argHasAValue () {
+function argNotEmpty () {
 	if test -n "$1"; then
 		return 0
 	else
@@ -15,7 +15,6 @@ function argHasAValue () {
 }
 
 function printHelp () {
-	# look into printf usage
 	HELP_MSG="================================================================\n"
 	HELP_MSG+="jpegopt usage: jpegopt [directory] [options] [jpegtran:switches]\n"
 	HELP_MSG+="================================================================\n"
@@ -48,6 +47,37 @@ function argIsDirectory () {
 	fi
 }
 
+function optionValueIsValid () {
+	if ( argIsEmpty "$2" ); then
+		printErr "argIsMissing" "$1"
+		return 1
+	elif ( ! argResemblesOption "$2" ); then
+
+		if ( specifiedOptionValueIsValid "$1" "$2" ); then
+			return 0
+		else
+			printErr "argIsInvalid" "$2" "$1"
+			return 1
+		fi
+
+	else
+		printErr "argIsOption" "$2"
+		return 1
+	fi
+}
+
+function specifiedOptionValueIsValid () {
+	case "$1" in
+		( "-maxdepth" ) \
+						argIsPositiveInteger "$2"; \
+						return $? ;;
+		( "-overwrite" ) \
+						argArrayContainsValue "`echo ${OVRWRT_ARGS[@]}`" "$2"; \
+						return $? ;;
+		( "-copy" ) return 0 ;;
+	esac
+}
+
 function argIsEmpty () {
 	if test -z "$1"; then
 		return 0
@@ -58,10 +88,9 @@ function argIsEmpty () {
 
 function printErr () {
 	case "$1" in
-		( "overwriteArgIsInvalid" ) ERR_MSG="'$2' is not a valid argument of option '-overwrite'. This option takes one of values 'off', 'bk' or 'dx'." ;;
-		( "argNotPositiveInteger" ) ERR_MSG="'$2' is not a positive integer." ;;
+		( "argIsInvalid" ) ERR_MSG="'$2' is not a valid argument of option '"$3"'." ;;
 		( "argIsOption" ) ERR_MSG="'$2' is not a valid argument for an option. Option arguments should not begin with a hyphen." ;;
-		( "argMissing" ) ERR_MSG="jpegtran switch '$2' requires a valid argument, none given." ;;
+		( "argIsMissing" ) ERR_MSG="Option '$2' requires a valid argument, none given." ;;
 	esac
 	echo "Error: $ERR_MSG"
 }
@@ -108,6 +137,7 @@ OVRWRT_MODE="bk"
 OVRWRT_ARGS=("off" "bk" "dx")
 MAX_DEPTH=1
 JPEG_IREGX=".*\.(jpg|jpeg)"
+OUTFILE_EXT="optmzd"
 
 # jpegtran defaults
 COPY_SWITCH="-copy none"
@@ -115,46 +145,36 @@ OPT_SWITCH="-optimize"
 SWITCHES=""
 
 # parse script arguments
-while (argHasAValue "$1") ; do
+while (argNotEmpty "$1") ; do
 
 	if test "${1}" = "-version" || test "${1}" = "-v"; then
-		echo "jpegopt.sh version: $VERSION"
-		exit
+		echo "$VERSION_STMNT"
+		exit 0
 
 	elif test "${1}" = "-help" || test "${1}" = "-h"; then
 		printHelp
 		sh -c "jpegtran -h"
-		exit
+		exit 0
 
 	elif ( argIsDirectory "${1}" ); then
 		DIR="${1}"
 
 	elif test "${1}" = "-maxdepth" || test "${1}" = "-md"; then
-		# replace MAX_DEPTH default with subsequent arg (value); perform additional shift
-		if ( argIsEmpty "${2}" ); then
-			printErr "argMissing" "${1}"
-			exit
-		elif ( argIsPositiveInteger "${2}" ); then
+		if ( optionValueIsValid "-maxdepth" "${2}" ); then
+			# replace MAX_DEPTH default with secondary arg
 			MAX_DEPTH=${2}
 			shift # additional shift
 		else
-			printErr "argNotPositiveInteger" "${2}"
-			exit
+			exit 1
 		fi
 
 	elif test "${1}" = "-overwrite"; then
-		if ( ! argResemblesOption "${2}" ) then
-			if ( argArrayContainsValue "`echo ${OVRWRT_ARGS[@]}`" "${2}" ); then
-				# replace OVRWRT_MODE default with subsequent arg (value); peform aditional shift
-				OVRWRT_MODE="${2}"
-				shift # additional shift
-			else
-				printErr "overwriteArgIsInvalid" "${2}"
-				exit
-			fi
+		if ( optionValueIsValid "-overwrite" "${2}" ); then
+			# replace OVRWRT_MODE default with secondary arg
+			OVRWRT_MODE="${2}"
+			shift # additional shift
 		else
-			printErr "argIsOption" "${2}"
-			exit
+			exit 1
 		fi
 
 	elif test "${1}" = "-dryrun" || test "${1}" = "-dry"; then
@@ -164,21 +184,18 @@ while (argHasAValue "$1") ; do
 		MODE="debug"
 
 	elif test "${1}" = "-copy"; then
-		if ( argIsEmpty "${2}" ); then
-			printErr "argMissing" "${1}"
-			exit
-		elif test "${2}" = "off"; then
-			COPY_SWITCH=""
-			shift # additional shift
-		else
-			if ( argResemblesOption "${2}" ); then
-				printErr "argIsOption" "${2}"
-				exit
+		if (optionValueIsValid "-copy" "${2}" ); then
+			if test "${2}" = "off"; then
+				# remove COPY_SWITCH default value altogether
+				COPY_SWITCH=""
+				shift # additional shift
 			else
 				# replace COPY_SWITCH default with args 1 and 2 (key and value)
 				COPY_SWITCH="${1} ${2}"
 				shift # additional shift
 			fi
+		else
+			exit 1
 		fi
 	
 	elif test "${1}" = "-optimize"; then
@@ -186,11 +203,6 @@ while (argHasAValue "$1") ; do
 			# -optimize only accepts 'off' as an argument
 			OPT_SWITCH=""
 			shift # additional shift
-		else
-			if ( ! argResemblesOption "${2}"); then
-				# ignore arguments following '-optimize' that don't look like an option
-				shift # additional shift
-			fi
 		fi
 
 	else		
@@ -210,31 +222,32 @@ while (argHasAValue "$1") ; do
 
 done
 
-if (argIsEmpty "$DIR"); then # is $DIR is a zero-length string?
+if ( argIsEmpty "$DIR" ); then
 	# DIR was not passed in the arguments list, so we'll assign pwd
 	DIR="$PWD"
 fi
 
 if (filesAreFound "$DIR" "$MAX_DEPTH" "$JPEG_IREGX"); then
 
-	# the purpose of this script is to optimize jpeg files, so -optimize switch is hardcoded
-	CMD="jpegtran $COPY_SWITCH $OPT_SWITCH $SWITCHES -outfile '{}'.optmzd '{}'"
+	CMD="jpegtran $COPY_SWITCH $OPT_SWITCH $SWITCHES -outfile '{}'.$OUTFILE_EXT '{}'"
 
 	case "$MODE" in
 		( "debug" ) JTRAN_STATEMENT="echo $CMD" ;; # echo the jpegtran statement
 		( "dryrun" ) JTRAN_STATEMENT="echo ' --> {}'" ;; # echo file(s) to be optimized
 		( * ) JTRAN_STATEMENT="$CMD; echo ' --> {}'" ;; # run $CMD and echo the optimized file(s)
 	esac
+
 	# find all jpeg files in DIR, to a given max depth, run each one through jpegtran
 	findThenExecute "$DIR" "$MAX_DEPTH" "$JPEG_IREGX" "$JTRAN_STATEMENT"
 
 	if test OVRWRT_MODE != "off" && \
-		(filesAreFound "$DIR" "$MAX_DEPTH" "$JPEG_IREGX\.optmzd"); then
+		(filesAreFound "$DIR" "$MAX_DEPTH" "$JPEG_IREGX\.$OUTFILE_EXT"); then
 
 		case "$OVRWRT_MODE" in
-			( "bk" ) OVRWRT_STATEMENT="mv '{}' '{}'~; mv '{}'.optmzd '{}'" ;;
-			( "dx" ) OVRWRT_STATEMENT="mv '{}'.optmzd '{}'" ;;
+			( "bk" ) OVRWRT_STATEMENT="mv '{}' '{}'~; mv '{}'.$OUTFILE_EXT '{}'" ;; # backup and replace original
+			( "dx" ) OVRWRT_STATEMENT="mv '{}'.$OUTFILE_EXT '{}'" ;; # replace original
 		esac
+
 		# move optimized files to original file name, with or without backup
 		findThenExecute "$DIR" "$MAX_DEPTH" "$JPEG_IREGX" "$OVRWRT_STATEMENT"
 	fi
