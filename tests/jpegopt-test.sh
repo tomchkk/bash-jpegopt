@@ -143,7 +143,7 @@ function jpegtranKeyValueSwitchesTests () {
 
 basicFunctionalityTests
 directoryOptionsTests
-maxDepthOptionTests
+maxdepthOptionTests
 overwriteOptionTests
 jpegtranDefaultsTests
 jpegtranCopyTests
