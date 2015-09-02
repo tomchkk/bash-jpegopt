@@ -1,30 +1,41 @@
 JPEGOPT
 =======
 
-Optimise multiple JPEGs with jpegtran
+Optimize multiple files with jpegtran
 -------------------------------------
 
-jpegopt is a small shell script made to enable use of the [libjpeg jpegtran utility][1] recursively—to optimise mulitiple JPEG files, including those located in sub-directories—rather than have to laboriously enter jpegtran commands for each file to be optimzed.
+jpegopt is a small shell script made to enable use of the [libjpeg jpegtran utility][1] recursively—to optimize mulitiple JPEG files, including those located in sub-directories—rather than have to laboriously enter jpegtran commands for each file to be optimzed.
 
 jpegopt was built and tested using jpegtran version 8d and the Bourne shell, on Mac OS X. It may work with other jpegran versions, in other shells, and on other unix-like systems – though this is untested.
 
-This script was a learning exercise, [inspired by][2], and [owing much][3] to these answers on stackoverflow. It was also my first attempt at shell scripting, so much reference was made to this [Shell Scripting Primer][4] and this [Advanced Bash-Scripting Guide][5]. It is almost certainly overkill, but I enjoyed making it and intend to put it to good use.
+This script was a learning exercise, [inspired by][2], and [owing much to][3] these answers on stackoverflow. This was also my first attempt at shell scripting, so much reference was made to this [Shell Scripting Primer][4] and this [Advanced Bash-Scripting Guide][5]. It is almost certainly overkill, but I enjoyed making it and intend to put it to good use.
 
 [1]: http://ijg.org
 [2]: http://stackoverflow.com/questions/5579183/jpegtran-optimize-without-changing-filename/12066282#12066282
-[3]: http://stackoverflow.com/questions/12831293/how-to-recursivly-use-jpegtran-command-line-to-optimise-all-files-in-subdirs
+[3]: http://stackoverflow.com/questions/12831293/how-to-recursivly-use-jpegtran-command-line-to-optimize-all-files-in-subdirs
 [4]: https://developer.apple.com/library/mac/documentation/OpenSource/Conceptual/ShellScripting
 [5]: http://www.faqs.org/docs/abs/HTML/index.html
 
 ### Installation
 
-- clone the directory from git
-  + **_HOW?_**
-  + `https://github.com/lickyourlips/script-jpegopt.git`
-- modify file permissions:
-  + `sudo chmod 755 jpegopt.sh`
-- copy the file to /usr/local/bin:
-  + `sudo cp jpegopt.sh /usr/local/bin/jpegopt.sh`
+Navigate to your preferred directory and clone the repository from git:
+
+	cd path-to-directory
+	git clone https://github.com/lickyourlips/jpegopt.git jpegopt
+
+Navigate to the newly cloned repository and modify the file permissions:
+	
+	cd jpegopt
+	sudo chmod 755 jpegopt.sh
+
+The script can then be run from the cloned repository:
+
+	./jpegopt.sh -v
+
+Or, by copying the file to `/usr/local/bin`, it can be run from anywhere (assuming `/usr/local/bin` is in your `$PATH`):
+
+	sudo cp jpegopt.sh /usr/local/bin/jpegopt.sh
+	jpegopt.sh -v
 
 ### Usage
 
@@ -64,13 +75,13 @@ This script was a learning exercise, [inspired by][2], and [owing much][3] to th
 
 	+ `-optimize` – this switch is enabled by default, but can be disabled by passing `-optimize off` as an argument to jpegopt.
 
-	**N.B.** jpegtran already handles non-existent switches and invalid argument values gracefully, so jpegopt is purposefully unaware of all available jpegtran switches.
+	**N.B.** jpegtran already handles non-existent switches and invalid argument values gracefully, so jpegopt is purposefully unaware of all of jpegtran's available switches.
 
-### Unit Testing
+### Testing
 
 From the cloned source directory, jpegopt can be tested using the following command:
 
-- `./tests/jpegopt.test.sh`
+	./tests/jpegopt.test.sh
 
 ### Disclaimer
 
