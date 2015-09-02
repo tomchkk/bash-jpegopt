@@ -55,25 +55,31 @@ function directoryOptionsTests () {
 	testCase "./jpegopt.sh -debug foo -md 2" "jpegtran -copy none -optimize -outfile $PWD/tests/test-img.jpg.optmzd $PWD/tests/test-img.jpg"
 }
 
-function maxDepthOptionTests () {
+function maxdepthOptionTests () {
 	# search in the current dir and up to a maximum of one child dir
 	testCase "./jpegopt.sh -dryrun -maxdepth 2" " --> $PWD/tests/test-img.jpg"
 
-	# option -maxdepth won't accept an argument that is not a number
-	testCase "./jpegopt.sh -dryrun -maxdepth foo" "Error: 'foo' is not a positive integer."
+	# -maxdepth must be given an argument
+	testCase "./jpegopt.sh -dryrun -maxdepth" "Error: Option '-maxdepth' requires a valid argument, none given."
 
-	# option -maxdepth won't accept a float as an argument
-	testCase "./jpegopt.sh -dryrun -maxdepth 1.1" "Error: '1.1' is not a positive integer."
+	# -maxdepth won't accept an argument that is not a number
+	testCase "./jpegopt.sh -dryrun -maxdepth foo" "Error: 'foo' is not a valid argument of option '-maxdepth'."
+
+	# -maxdepth won't accept a float as an argument
+	testCase "./jpegopt.sh -dryrun -maxdepth 1.1" "Error: '1.1' is not a valid argument of option '-maxdepth'."
 }
 
 function overwriteOptionTests () {
-	# overwrite only accepts defined arguments
-	testCase "./jpegopt.sh -dryrun tests -overwrite kdjlf" "Error: 'kdjlf' is not a valid argument of option '-overwrite'. This option takes one of values 'off', 'bk' or 'dx'."
+	# -overwrite only accepts defined arguments
+	testCase "./jpegopt.sh -dryrun tests -overwrite kdjlf" "Error: 'kdjlf' is not a valid argument of option '-overwrite'."
 
-	# overwrite accepts arguments 'off', 'bk' or 'dx' (the final occurrence is used)
+	# -overwrite must be given an argument
+	testCase "./jpegopt.sh -dryrun -overwrite" "Error: Option '-overwrite' requires a valid argument, none given."
+
+	# -overwrite accepts arguments 'off', 'bk' or 'dx' (the final occurrence is used)
 	testCase "./jpegopt.sh -dryrun tests -overwrite off -overwrite bk -overwrite dx" " --> tests/test-img.jpg"
 
-	# overwrite can't receive an option as an argument
+	# -overwrite can't receive an option as an argument
 	testCase "./jpegopt.sh -dryrun tests -overwrite -test" "Error: '-test' is not a valid argument for an option. Option arguments should not begin with a hyphen."
 }
 
@@ -90,7 +96,7 @@ function jpegtranCopyTests () {
 	testCase "./jpegopt.sh -debug -maxdepth 2 -copy all" "jpegtran -copy all -optimize -outfile $PWD/tests/test-img.jpg.optmzd $PWD/tests/test-img.jpg"
 
 	# -copy switch value cannot be omitted
-	testCase "./jpegopt.sh -debug -copy" "Error: jpegtran switch '-copy' requires a valid argument, none given."
+	testCase "./jpegopt.sh -debug -copy" "Error: Option '-copy' requires a valid argument, none given."
 
 	# -copy switch value cannot be another option
 	testCase "./jpegopt.sh -debug -copy -foo" "Error: '-foo' is not a valid argument for an option. Option arguments should not begin with a hyphen."
@@ -102,6 +108,9 @@ function jpegtranOptimizeTests () {
 
 	# -optimize switch ignores invalid arguments
 	testCase "./jpegopt.sh -debug tests -optimize blaa" "jpegtran -copy none -optimize -outfile tests/test-img.jpg.optmzd tests/test-img.jpg"
+
+	# -optimize switch doesn't ignore following directories
+	testCase "./jpegopt.sh -debug -optimize tests" "jpegtran -copy none -optimize -outfile tests/test-img.jpg.optmzd tests/test-img.jpg"
 
 	# -optimize switch can be followed by another option
 	testCase "./jpegopt.sh -debug tests -optimize -trim" "jpegtran -copy none -optimize -trim -outfile tests/test-img.jpg.optmzd tests/test-img.jpg"
