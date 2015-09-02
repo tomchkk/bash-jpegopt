@@ -24,7 +24,7 @@ function printHelp () {
 	HELP_MSG+="* Options:\n"
 	HELP_MSG+=" -help|-h 	 Print this help menu\n"
 	HELP_MSG+=" -maxdepth|-md N Set maximum directory depth for jpeg file search (default = 1)\n"
-	HELP_MSG+=" -overwrite off Save outfile as .optmzd and leave original untouched\n"
+	HELP_MSG+=" -overwrite off  Save outfile as .optmzd and leave original untouched\n"
 	HELP_MSG+=" -overwrite bk 	 Back-up then overwrite original with optimized file (default)\n"
 	HELP_MSG+=" -overwrite dx 	 Destructively overwrite original with optimized file\n"
 	HELP_MSG+=" -dryrun|-dry 	 Perform a dry run without making any changes\n"
