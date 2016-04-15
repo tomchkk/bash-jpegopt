@@ -4,7 +4,8 @@
 
 VERSION="1.0.1"
 AUTHOR="tomchkk"
-VERSION_STMNT="JPEGOPT Version $VERSION – September 2015\nAuthor: $AUTHOR"
+UPDATE="April 2016"
+VERSION_STMNT="JPEGOPT Version $VERSION – $UPDATE\nAuthor: $AUTHOR"
 
 function argNotEmpty () {
 	if test -n "$1"; then
