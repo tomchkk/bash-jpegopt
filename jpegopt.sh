@@ -2,8 +2,8 @@
 
 # A shell script to run command 'jpegtran -copy none -optimize' recursively, on a given directory, and with any of jpegtran's available options set
 
-VERSION="1.0"
-AUTHOR="lickyourlips"
+VERSION="1.0.1"
+AUTHOR="tomchkk"
 VERSION_STMNT="JPEGOPT Version $VERSION – September 2015\nAuthor: $AUTHOR"
 
 function argNotEmpty () {
@@ -113,7 +113,7 @@ function argResemblesOption () {
 
 function argArrayContainsValue () {
 	ARRAY=( `echo "$1"` )
-	case "${ARRAY[@]}" in 
+	case "${ARRAY[@]}" in
 		( *"$2"* ) return 0 ;;
 		( * ) return 1 ;;
 	esac
@@ -197,7 +197,7 @@ while (argNotEmpty "$1") ; do
 		else
 			exit 1
 		fi
-	
+
 	elif test "${1}" = "-optimize"; then
 		if test "${2}" = "off"; then
 			# -optimize only accepts 'off' as an argument
@@ -205,7 +205,7 @@ while (argNotEmpty "$1") ; do
 			shift # additional shift
 		fi
 
-	else		
+	else
 		if ( argResemblesOption ${1} ); then
 			# build any remaining jpegtran switches
 			if ( ! argResemblesOption ${2} ); then
