@@ -4,7 +4,7 @@ function testCase() {
 	local TEST_INPUT="$(sh -c "$1")"
 	local EXPECTED="$2"
 
-	if test "$TEST_INPUT" = "$EXPECTED"; then
+	if [[ "$TEST_INPUT" == *"$EXPECTED"* ]]; then
 		printf "."
 		return 0
 	else
@@ -19,6 +19,9 @@ function testCase() {
 
 
 function basicFunctionalityTests () {
+	# no options passed to the script return the jpegopt help menu
+	testCase "./jpegopt.sh" "jpegopt usage"
+
 	# a debug of the script's current directory finds no jpegs
 	testCase "./jpegopt.sh -debug" "jpegopt: No files found"
 

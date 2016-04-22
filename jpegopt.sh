@@ -2,10 +2,10 @@
 
 # A shell script to run command 'jpegtran -copy none -optimize' recursively, on a given directory, and with any of jpegtran's available options set
 
-VERSION="1.0.1"
+VERSION="1.0.2"
 AUTHOR="tomchkk"
-UPDATE="April 2016"
-VERSION_STMNT="JPEGOPT Version $VERSION – $UPDATE\nAuthor: $AUTHOR"
+UPDATE="22/04/2016"
+VERSION_STMNT="JPEGOPT Version $VERSION – ($UPDATE)\nAuthor: $AUTHOR"
 
 function argNotEmpty () {
 	if test -n "$1"; then
@@ -23,7 +23,7 @@ function printHelp () {
 	HELP_MSG+="A valid relative or absolute directory path (default = current working directory)\n"
 	HELP_MSG+="\n"
 	HELP_MSG+="* Options:\n"
-	HELP_MSG+=" -help|-h 	 Print this help menu\n"
+	HELP_MSG+=" -help|-h|(-hh)  Print this help menu (and the jpegtran help menu)\n"
 	HELP_MSG+=" -maxdepth|-md N Set maximum directory depth for jpeg file search (default = 1)\n"
 	HELP_MSG+=" -overwrite off  Save outfile as .optmzd and leave original untouched\n"
 	HELP_MSG+=" -overwrite bk 	 Back-up then overwrite original with optimized file (default)\n"
@@ -38,6 +38,10 @@ function printHelp () {
 	HELP_MSG+="================================================================\n"
 
 	printf "$HELP_MSG\n"
+}
+
+function printVersionStatement() {
+	echo "$VERSION_STMNT"
 }
 
 function argIsDirectory () {
@@ -145,14 +149,25 @@ COPY_SWITCH="-copy none"
 OPT_SWITCH="-optimize"
 SWITCHES=""
 
+# if no argument is passed, print help menu only
+if (argIsEmpty "$1"); then
+	printVersionStatement
+	printHelp
+	exit 0
+fi
+
 # parse script arguments
-while (argNotEmpty "$1") ; do
+while ( argNotEmpty "$1" ) ; do
 
 	if test "${1}" = "-version" || test "${1}" = "-v"; then
-		echo "$VERSION_STMNT"
+		printVersionStatement
 		exit 0
 
 	elif test "${1}" = "-help" || test "${1}" = "-h"; then
+		printHelp
+		exit 0
+
+	elif test "${1}" = "-hh"; then
 		printHelp
 		sh -c "jpegtran -h"
 		exit 0
@@ -228,7 +243,7 @@ if ( argIsEmpty "$DIR" ); then
 	DIR="$PWD"
 fi
 
-if (filesAreFound "$DIR" "$MAX_DEPTH" "$JPEG_IREGX"); then
+if ( filesAreFound "$DIR" "$MAX_DEPTH" "$JPEG_IREGX" ); then
 
 	CMD="jpegtran $COPY_SWITCH $OPT_SWITCH $SWITCHES -outfile '{}'.$OUTFILE_EXT '{}'"
 
@@ -242,7 +257,7 @@ if (filesAreFound "$DIR" "$MAX_DEPTH" "$JPEG_IREGX"); then
 	findThenExecute "$DIR" "$MAX_DEPTH" "$JPEG_IREGX" "$JTRAN_STATEMENT"
 
 	if test OVRWRT_MODE != "off" && \
-		(filesAreFound "$DIR" "$MAX_DEPTH" "$JPEG_IREGX\.$OUTFILE_EXT"); then
+		( filesAreFound "$DIR" "$MAX_DEPTH" "$JPEG_IREGX\.$OUTFILE_EXT" ); then
 
 		case "$OVRWRT_MODE" in
 			( "bk" ) OVRWRT_STATEMENT="mv '{}' '{}'~; mv '{}'.$OUTFILE_EXT '{}'" ;; # backup and replace original
