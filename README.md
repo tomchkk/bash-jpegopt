@@ -21,10 +21,10 @@ This script was a learning exercise, [inspired by][2], and [owing much to][3] th
 Navigate to your preferred directory and clone the repository from git:
 
 	cd path-to-directory
-	git clone https://github.com/lickyourlips/jpegopt.git jpegopt
+	git clone https://github.com/tomchkk/jpegopt.git jpegopt
 
 Navigate to the newly cloned repository and modify the file permissions:
-	
+
 	cd jpegopt
 	sudo chmod 755 jpegopt.sh
 
@@ -60,11 +60,11 @@ Or, by copying the file to `/usr/local/bin`, it can be run from anywhere (assumi
     As well as accepting all of jpegtran's switches, jpegopt also has it's own options:
 
     + `-maxdepth` sets the maximum directory depth at which to search for JPEG files. `-maxdepth` defaults to 1, which would limit the search to the directory given as the directory argument (or the current working directory, if the argument is omitted). This option passed as `-maxdepth 2` would search the given directory and any immediate child directories, and so on...
-    
+
     + `-overwrite` sets the method by which jpegopt handles any original files to be optimized. The default setting, `-overwrite bk`, takes a back-up of the original file and replaces it with the optimized file. Passing this option as `-overwrite dx` will destructively replace the orginal file with the optimized one. `-overwrite off` disables this feature altogether, resulting in two files: _original.jpg_ and _original.jpg.optmzd_.
-    
+
     + `-dryrun` enables the dry-run mode, giving a list of files found that would be optimized, according to the given options.
-    
+
     + `-debug` enables a debug mode, printing the jpegtran command that would be used, according to the given options.
 
 - ##### jpegtrans Switches
